@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from evaluacion_app.models import Reservas
 from evaluacion_app.forms import FormReservas
 
@@ -15,11 +15,29 @@ def listadoReservas(request):
 def agregarReserva(request):
     form = FormReservas()
 
-    if(request.method == 'POST'):
+    if request.method == 'POST':
         form = FormReservas(request.POST)
-        if(form.is_valid()):
+        if form.is_valid():
             form.save()
-        return index(request)
-    
+            return redirect('/reservas')
+
+    data = {'form': form}
+    return render(request, 'agregar.html', data)
+
+def eliminarReserva(request, IN_id):
+    reserva = Reservas.objects.get(id = IN_id)
+    reserva.delete()
+    return redirect('/reservas')
+
+def modificarReserva(request, IN_id):
+    reserva = Reservas.objects.get(id=IN_id)
+    form = FormReservas(instance=reserva)
+
+    if request.method == 'POST':
+        form = FormReservas(request.POST, instance=reserva)
+        if form.is_valid():
+            form.save()
+            return redirect('/reservas')
+
     data = {'form': form}
     return render(request, 'agregar.html', data)
